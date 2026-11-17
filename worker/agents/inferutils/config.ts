@@ -9,42 +9,42 @@ import {
 } from "./config.types";
 import { env } from 'cloudflare:workers';
 
-// Common configs - these are good defaults
+// Common configs - routed via Cloudflare AI Gateway using top coding LLMs
 const COMMON_AGENT_CONFIGS = {
     screenshotAnalysis: {
         name: AIModels.DISABLED,
         reasoning_effort: 'medium' as const,
-        max_tokens: 4096,
+        max_tokens: 8000,
         temperature: 1,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        fallbackModel: AIModels.CLAUDE_4_5_SONNET,
     },
     realtimeCodeFixer: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         reasoning_effort: 'low' as const,
-        max_tokens: 8192,
+        max_tokens: 32000,
         temperature: 0.2,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
     },
     fastCodeFixer: {
         name: AIModels.DISABLED,
         reasoning_effort: undefined,
-        max_tokens: 8192,
+        max_tokens: 64000,
         temperature: 0.0,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        fallbackModel: AIModels.CLAUDE_4_5_SONNET,
     },
     templateSelection: {
-        name: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        name: AIModels.CLAUDE_4_5_HAIKU,
         max_tokens: 2000,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        fallbackModel: AIModels.OPENAI_5_MINI,
         temperature: 0.6,
     },
 } as const;
 
 const SHARED_IMPLEMENTATION_CONFIG = {
-    reasoning_effort: 'low' as const,
-    max_tokens: 8192,
-    temperature: 0.7,
-    fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+    reasoning_effort: 'medium' as const,
+    max_tokens: 48000,
+    temperature: 0.2,
+    fallbackModel: AIModels.OPENAI_5_2,
 };
 
 //======================================================================================
@@ -117,66 +117,66 @@ const PLATFORM_AGENT_CONFIG: AgentConfig = {
 };
 
 //======================================================================================
-// Default Workers AI config (Neuron-first, uses CLOUDFLARE_API_TOKEN + AI Gateway)
+// Top Coding LLMs via Cloudflare AI Gateway (Claude 4.5 Opus/Sonnet/Haiku + GPT-5.2)
 //======================================================================================
 const DEFAULT_AGENT_CONFIG: AgentConfig = {
     ...COMMON_AGENT_CONFIGS,
     templateSelection: {
-        name: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        name: AIModels.CLAUDE_4_5_HAIKU,
         max_tokens: 2000,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        fallbackModel: AIModels.OPENAI_5_MINI,
         temperature: 0.6,
     },
     blueprint: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
-        reasoning_effort: 'low',
-        max_tokens: 8192,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
-        temperature: 0.7,
+        name: AIModels.CLAUDE_4_5_OPUS,
+        reasoning_effort: 'high',
+        max_tokens: 32000,
+        fallbackModel: AIModels.CLAUDE_4_5_SONNET,
+        temperature: 0.4,
     },
     projectSetup: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseGeneration: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     firstPhaseImplementation: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseImplementation: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     conversationalResponse: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         reasoning_effort: 'low',
-        max_tokens: 4000,
+        max_tokens: 8000,
         temperature: 0.2,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        fallbackModel: AIModels.CLAUDE_4_5_HAIKU,
     },
     deepDebugger: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
-        reasoning_effort: 'low',
-        max_tokens: 8192,
-        temperature: 0.4,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        name: AIModels.CLAUDE_4_5_OPUS,
+        reasoning_effort: 'high',
+        max_tokens: 32000,
+        temperature: 0.2,
+        fallbackModel: AIModels.OPENAI_5_2,
     },
     fileRegeneration: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        name: AIModels.CLAUDE_4_5_SONNET,
         reasoning_effort: 'low',
-        max_tokens: 8192,
-        temperature: 0.2,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        max_tokens: 32000,
+        temperature: 0.0,
+        fallbackModel: AIModels.OPENAI_5_2,
     },
     agenticProjectBuilder: {
-        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
-        reasoning_effort: 'low',
-        max_tokens: 8192,
-        temperature: 0.5,
-        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        name: AIModels.CLAUDE_4_5_SONNET,
+        reasoning_effort: 'medium',
+        max_tokens: 32000,
+        temperature: 0.2,
+        fallbackModel: AIModels.OPENAI_5_2,
     },
 };
 
