@@ -22,3 +22,8 @@ This skill distills core agentic engineering practices tailored to the SpaceDO w
 - Always run `deploy_space` after making changes and inspect the live preview with `get_browser_console_logs`.
 - Fix root causes rather than masking errors—if a build or runtime error appears, read the failing file and trace the exact import, route, or type mismatch before editing.
 - Never claim a feature works or is deployed unless you observed a clean `deploy_space` and verified zero runtime errors.
+
+## 5. Commercial & Production Guardrails
+- **Security & business logic review:** Before any app handles live customer traffic, explicitly review and harden authentication edge cases, server-side input validation, rate limiting, and payment/webhook signature verification (e.g., Stripe webhook signatures and idempotency). Flag any areas requiring human security sign-off.
+- **Delivery model (no shared `DISPATCHER` namespace):** Do not assume multi-tenant wildcard subdomain hosting (`*preview...`) on the platform account. Structure apps for standalone production delivery via **client-account deploy** or **GitHub export**.
+- **Production secrets & domains:** Never hardcode commercial credentials (Stripe keys, webhook secrets, email/SMTP keys, OAuth secrets). Read them from `env.*` Worker bindings/secrets and provide a clear checklist of required secrets and custom DNS/domain settings for the target client's Cloudflare account after generation.
