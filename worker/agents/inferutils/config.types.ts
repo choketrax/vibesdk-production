@@ -361,6 +361,18 @@ const MODELS_MASTER = {
             nonReasoning: true,
             directOverride: true,
         },
+    },
+    WORKERS_AI_QWEN_2_5_CODER_32B: {
+        id: '@cf/qwen/qwen2.5-coder-32b-instruct',
+        config: {
+            name: 'Workers AI Qwen 2.5 Coder 32B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai',
+            creditCost: 0.4,
+            contextSize: 32768,
+            nonReasoning: true,
+            directOverride: true,
+        },
     }
 } as const;
 
