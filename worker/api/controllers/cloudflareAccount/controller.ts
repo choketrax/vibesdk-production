@@ -43,9 +43,12 @@ export class CloudflareAccountController extends BaseController {
 			let refreshedCookie: string | undefined;
 
 			if (shouldRefresh) {
-				const { accessToken, refreshedCookie: cookie } =
+				const { accessToken: oauthToken, refreshedCookie: cookie } =
 					await resolveCloudflareAccessTokenFromRequest(env, user.id, request);
 				refreshedCookie = cookie;
+
+				const oauthClientId = (env as { CLOUDFLARE_CONNECT_CLIENT_ID?: string }).CLOUDFLARE_CONNECT_CLIENT_ID;
+				const accessToken = oauthToken || (!oauthClientId ? env.CLOUDFLARE_API_TOKEN : null);
 
 				if (accessToken) {
 					// Re-provision from Cloudflare. This adds newly-created gateways and

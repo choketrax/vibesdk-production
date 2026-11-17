@@ -205,6 +205,10 @@ export async function resolveCloudflareAccessTokenFromRequest(
 
 	const blob = extractCloudflareToken(request, env);
 	if (!blob) {
+		const oauthClientId = (env as { CLOUDFLARE_CONNECT_CLIENT_ID?: string }).CLOUDFLARE_CONNECT_CLIENT_ID;
+		if (!oauthClientId && env.CLOUDFLARE_API_TOKEN) {
+			return { accessToken: env.CLOUDFLARE_API_TOKEN };
+		}
 		return { accessToken: null };
 	}
 
@@ -232,6 +236,10 @@ export async function resolveCloudflareAccessToken(
 	originUrl?: string,
 ): Promise<{ accessToken: string | null; refreshedBlob?: string; reconnectRequired: boolean }> {
 	if (!encryptedBlob) {
+		const oauthClientId = (env as { CLOUDFLARE_CONNECT_CLIENT_ID?: string }).CLOUDFLARE_CONNECT_CLIENT_ID;
+		if (!oauthClientId && env.CLOUDFLARE_API_TOKEN) {
+			return { accessToken: env.CLOUDFLARE_API_TOKEN, reconnectRequired: false };
+		}
 		return { accessToken: null, reconnectRequired: true };
 	}
 	const resolved = await resolveAccessToken(env, userId, encryptedBlob, undefined, originUrl);

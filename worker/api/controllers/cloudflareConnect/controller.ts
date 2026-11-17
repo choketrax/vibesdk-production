@@ -140,6 +140,19 @@ export class CloudflareConnectController extends BaseController {
 				body.data.returnUrl || request.headers.get('Referer'),
 				request,
 			);
+
+			// Self-hosted multi-account mode: when Cloudflare OAuth is not configured,
+			// provision directly from the platform's permitted CLOUDFLARE_API_TOKEN.
+			const oauthClientId = (env as { CLOUDFLARE_CONNECT_CLIENT_ID?: string }).CLOUDFLARE_CONNECT_CLIENT_ID;
+			if (!oauthClientId && env.CLOUDFLARE_API_TOKEN) {
+				const provisioning = new CloudflareProvisioningService(env);
+				await provisioning.provisionFromToken(env.CLOUDFLARE_API_TOKEN, user.id);
+				const separator = returnPath.includes('?') ? '&' : '?';
+				return CloudflareConnectController.createSuccessResponse({
+					authUrl: `${requestOrigin}${returnPath}${separator}cloudflare=connected`,
+				});
+			}
+
 			const codeVerifier = BaseOAuthProvider.generateCodeVerifier();
 			const flowId = generateSecureToken(16);
 			const state: CloudflareConnectState = {
