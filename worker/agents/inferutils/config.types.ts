@@ -337,6 +337,30 @@ const MODELS_MASTER = {
             creditCost: 8, // $0.22
             contextSize: 262144, // 256K Context
         },
+    },
+    WORKERS_AI_LLAMA_3_3_70B: {
+        id: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+        config: {
+            name: 'Workers AI Llama 3.3 70B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai',
+            creditCost: 0.5,
+            contextSize: 24000,
+            nonReasoning: true,
+            directOverride: true,
+        },
+    },
+    WORKERS_AI_LLAMA_3_1_8B: {
+        id: '@cf/meta/llama-3.1-8b-instruct',
+        config: {
+            name: 'Workers AI Llama 3.1 8B',
+            size: ModelSize.LITE,
+            provider: 'workers-ai',
+            creditCost: 0.1,
+            contextSize: 32768,
+            nonReasoning: true,
+            directOverride: true,
+        },
     }
 } as const;
 

@@ -455,6 +455,14 @@ export async function getConfigurationForModel(
                     baseURL: 'https://api.anthropic.com/v1/',
                     apiKey: env.ANTHROPIC_API_KEY,
                 };
+            case 'workers-ai':
+                return {
+                    baseURL: `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/ai/v1`,
+                    apiKey: env.CLOUDFLARE_API_TOKEN,
+                    defaultHeaders: env.CLOUDFLARE_AI_GATEWAY
+                        ? { 'cf-aig-gateway-id': env.CLOUDFLARE_AI_GATEWAY }
+                        : undefined,
+                };
             default:
                 providerForcedOverride = modelConfig.provider as AIGatewayProviders;
                 break;

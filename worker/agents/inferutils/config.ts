@@ -14,37 +14,37 @@ const COMMON_AGENT_CONFIGS = {
     screenshotAnalysis: {
         name: AIModels.DISABLED,
         reasoning_effort: 'medium' as const,
-        max_tokens: 8000,
+        max_tokens: 4096,
         temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
     },
     realtimeCodeFixer: {
-        name: AIModels.GROK_4_1_FAST_NON_REASONING,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         reasoning_effort: 'low' as const,
-        max_tokens: 32000,
+        max_tokens: 8192,
         temperature: 0.2,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
     },
     fastCodeFixer: {
         name: AIModels.DISABLED,
         reasoning_effort: undefined,
-        max_tokens: 64000,
+        max_tokens: 8192,
         temperature: 0.0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
     },
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.WORKERS_AI_LLAMA_3_1_8B,
         max_tokens: 2000,
-        fallbackModel: AIModels.GROK_4_1_FAST_NON_REASONING,
-        temperature: 1,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        temperature: 0.6,
     },
 } as const;
 
 const SHARED_IMPLEMENTATION_CONFIG = {
     reasoning_effort: 'low' as const,
-    max_tokens: 48000,
-    temperature: 1,
-    fallbackModel: AIModels.GEMINI_2_5_PRO,
+    max_tokens: 8192,
+    temperature: 0.7,
+    fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
 };
 
 //======================================================================================
@@ -117,67 +117,66 @@ const PLATFORM_AGENT_CONFIG: AgentConfig = {
 };
 
 //======================================================================================
-// Default Gemini-only config (most likely used in your deployment)
+// Default Workers AI config (Neuron-first, uses CLOUDFLARE_API_TOKEN + AI Gateway)
 //======================================================================================
-/* These are the default out-of-the box gemini-only models used when PLATFORM_MODEL_PROVIDERS is not set */
 const DEFAULT_AGENT_CONFIG: AgentConfig = {
     ...COMMON_AGENT_CONFIGS,
     templateSelection: {
-        name: AIModels.GEMINI_2_5_FLASH_LITE,
+        name: AIModels.WORKERS_AI_LLAMA_3_1_8B,
         max_tokens: 2000,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         temperature: 0.6,
     },
     blueprint: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
-        reasoning_effort: 'high',
-        max_tokens: 64000,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
-        temperature: 1,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        reasoning_effort: 'low',
+        max_tokens: 8192,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
+        temperature: 0.7,
     },
     projectSetup: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseGeneration: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     firstPhaseImplementation: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     phaseImplementation: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         ...SHARED_IMPLEMENTATION_CONFIG,
     },
     conversationalResponse: {
-        name: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         reasoning_effort: 'low',
         max_tokens: 4000,
-        temperature: 0,
-        fallbackModel: AIModels.GEMINI_2_5_PRO,
+        temperature: 0.2,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
     },
     deepDebugger: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
-        reasoning_effort: 'high',
-        max_tokens: 8000,
-        temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        reasoning_effort: 'low',
+        max_tokens: 8192,
+        temperature: 0.4,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
     },
     fileRegeneration: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
         reasoning_effort: 'low',
-        max_tokens: 32000,
-        temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        max_tokens: 8192,
+        temperature: 0.2,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
     },
     agenticProjectBuilder: {
-        name: AIModels.GEMINI_3_FLASH_PREVIEW,
-        reasoning_effort: 'high',
-        max_tokens: 8000,
-        temperature: 1,
-        fallbackModel: AIModels.GEMINI_2_5_FLASH,
+        name: AIModels.WORKERS_AI_LLAMA_3_3_70B,
+        reasoning_effort: 'low',
+        max_tokens: 8192,
+        temperature: 0.5,
+        fallbackModel: AIModels.WORKERS_AI_LLAMA_3_1_8B,
     },
 };
 
