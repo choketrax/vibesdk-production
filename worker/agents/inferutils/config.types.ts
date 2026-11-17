@@ -373,6 +373,50 @@ const MODELS_MASTER = {
             nonReasoning: true,
             directOverride: true,
         },
+    },
+    WORKERS_AI_DEEPSEEK_V4_1_FLASH: {
+        id: '@cf/deepseek-ai/deepseek-v4.1-flash-1017',
+        config: {
+            name: 'Workers AI DeepSeek V4.1 Flash (1017)',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai',
+            creditCost: 0.6,
+            contextSize: 1048576,
+            directOverride: true,
+        },
+    },
+    WORKERS_AI_GPT_OSS_120B: {
+        id: '@cf/openai/gpt-oss-120b',
+        config: {
+            name: 'Workers AI GPT-OSS 120B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai',
+            creditCost: 0.6,
+            contextSize: 131072,
+            directOverride: true,
+        },
+    },
+    WORKERS_AI_QWEN_3_8_27B: {
+        id: '@cf/qwen/qwen3.8-27b',
+        config: {
+            name: 'Workers AI Qwen 3.8 27B',
+            size: ModelSize.REGULAR,
+            provider: 'workers-ai',
+            creditCost: 0.4,
+            contextSize: 131072,
+            directOverride: true,
+        },
+    },
+    WORKERS_AI_GLM_4_7_FLASH: {
+        id: '@cf/zai-org/glm-4.7-flash',
+        config: {
+            name: 'Workers AI GLM 4.7 Flash',
+            size: ModelSize.LITE,
+            provider: 'workers-ai',
+            creditCost: 0.2,
+            contextSize: 131072,
+            directOverride: true,
+        },
     }
 } as const;
 
