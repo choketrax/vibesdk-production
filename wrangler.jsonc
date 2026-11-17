@@ -235,7 +235,7 @@
             },
             "version": "1.0.0"
         },
-        "CUSTOM_DOMAIN": "companykick.com/appgen",
+        "CUSTOM_DOMAIN": "appgen.companykick.com",
         "MAX_SANDBOX_INSTANCES": "10",
         "SANDBOX_INSTANCE_TYPE": "standard-3",
         "DEV_BROWSER_SIDECAR_URL": "http://127.0.0.1:9223",
