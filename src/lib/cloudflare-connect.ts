@@ -7,12 +7,13 @@ export async function startCloudflareConnect(returnUrl?: string): Promise<void> 
 		const authUrl = response.data?.authUrl;
 		if (!authUrl) throw new Error('Cloudflare authorization URL was not returned');
 
-		const parsedUrl = new URL(authUrl);
-		if (
-			parsedUrl.protocol !== 'https:' ||
-			parsedUrl.hostname !== 'dash.cloudflare.com' ||
-			parsedUrl.pathname !== '/oauth2/authorize'
-		) {
+		const parsedUrl = new URL(authUrl, window.location.origin);
+		const isSameOriginReturn = parsedUrl.origin === window.location.origin;
+		const isCloudflareOAuth =
+			parsedUrl.protocol === 'https:' &&
+			parsedUrl.hostname === 'dash.cloudflare.com' &&
+			parsedUrl.pathname === '/oauth2/authorize';
+		if (!isSameOriginReturn && !isCloudflareOAuth) {
 			throw new Error('Invalid Cloudflare authorization URL');
 		}
 		window.location.assign(parsedUrl.toString());
