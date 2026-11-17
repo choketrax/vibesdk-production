@@ -906,7 +906,7 @@ export class ThinkCodingBehavior
 	async deployToCloudflare(
 		target: DeploymentTarget = 'user',
 	): Promise<{ deploymentUrl?: string; workersUrl?: string } | null> {
-		const userAccountDeployEnabled = this.env.ENABLE_USER_ACCOUNT_DEPLOY === 'true';
+		const userAccountDeployEnabled = this.env.ENABLE_USER_ACCOUNT_DEPLOY?.trim() === 'true';
 
 		if (!userAccountDeployEnabled) {
 			return this.deployThinkAppToPlatform();
