@@ -53,7 +53,7 @@ function buildEntryModule(mainModule: string, hasAssets: boolean, hasApp: boolea
 		? `export { App } from ${JSON.stringify(specifier)};\n`
 		: 'import { DurableObject } from "cloudflare:workers";\nexport class App extends DurableObject {}\n';
 	const assetRouting = hasAssets
-		? 'const assetResponse = await env.ASSETS.fetch(request); if (assetResponse.status !== 404) return assetResponse; const accept = request.headers.get("accept") || ""; if (request.method === "GET" && accept.includes("text/html")) { const indexUrl = new URL("/index.html", request.url); const indexResponse = await env.ASSETS.fetch(new Request(indexUrl, request)); if (indexResponse.status !== 404) return indexResponse; } '
+		? 'const url = new URL(request.url); if ((request.method === "GET" || request.method === "HEAD") && !url.pathname.startsWith("/api/")) { const assetResponse = await env.ASSETS.fetch(request); if (assetResponse.status !== 404 && assetResponse.status !== 405) return assetResponse; const accept = request.headers.get("accept") || ""; if (request.method === "GET" && accept.includes("text/html")) { const indexUrl = new URL("/index.html", request.url); const indexResponse = await env.ASSETS.fetch(new Request(indexUrl, request)); if (indexResponse.status !== 404) return indexResponse; } } '
 		: '';
 	const appRouting = hasApp
 		? `return env.${APP_BINDING}.get(env.${APP_BINDING}.idFromName("main")).fetch(request);`
