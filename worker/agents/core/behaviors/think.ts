@@ -248,9 +248,10 @@ export class ThinkCodingBehavior
 			CLOUDFLARE_API_TOKEN?: string;
 		};
 		const gatewayToken = tokenEnv.CLOUDFLARE_AI_GATEWAY_TOKEN || tokenEnv.CLOUDFLARE_API_TOKEN;
-		const usesStoredKeys = !conf.defaultHeaders?.['cf-aig-authorization'];
+		const isDirectWorkersAi = aiModelConfig.provider === 'workers-ai' && aiModelConfig.directOverride;
+		const usesStoredKeys = isDirectWorkersAi ? false : !conf.defaultHeaders?.['cf-aig-authorization'];
 		const headers: Record<string, string> = { ...(conf.defaultHeaders ?? {}) };
-		if (gatewayToken && !headers['cf-aig-authorization']) {
+		if (!isDirectWorkersAi && gatewayToken && !headers['cf-aig-authorization']) {
 			headers['cf-aig-authorization'] = `Bearer ${gatewayToken}`;
 		}
 
@@ -263,7 +264,7 @@ export class ThinkCodingBehavior
 			CLOUDFLARE_AI_GATEWAY?: string;
 		};
 		let baseURL = conf.baseURL;
-		if (env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_AI_GATEWAY) {
+		if (!isDirectWorkersAi && env.CLOUDFLARE_ACCOUNT_ID && env.CLOUDFLARE_AI_GATEWAY) {
 			baseURL = `https://gateway.ai.cloudflare.com/v1/${env.CLOUDFLARE_ACCOUNT_ID}/${env.CLOUDFLARE_AI_GATEWAY}/compat`;
 		}
 
