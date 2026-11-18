@@ -478,4 +478,105 @@ export class CodingAgentController extends BaseController {
             return appError;
         }
     }
+
+    static async importGitHubRepository(
+        request: Request,
+        env: Env,
+        _: ExecutionContext,
+        context: RouteContext,
+    ): Promise<Response> {
+        try {
+            const agentId = context.pathParams.agentId;
+            if (!agentId) {
+                return CodingAgentController.createErrorResponse('Missing agent ID parameter', 400);
+            }
+            const body = (await request.json().catch(() => ({}))) as {
+                repoUrl?: string;
+                ref?: string;
+                githubToken?: string;
+            };
+            if (!body.repoUrl || typeof body.repoUrl !== 'string') {
+                return CodingAgentController.createErrorResponse('repoUrl is required', 400);
+            }
+            const agentInstance = await getAgentStub(env, agentId);
+            const result = await agentInstance.importGitHubRepository(
+                body.repoUrl,
+                body.ref,
+                body.githubToken,
+            );
+            return CodingAgentController.createSuccessResponse(result);
+        } catch (error) {
+            return CodingAgentController.createErrorResponse(
+                error instanceof Error ? error.message : 'Failed to import GitHub repository',
+                400,
+            );
+        }
+    }
+
+    static async approveConversionSpec(
+        _request: Request,
+        env: Env,
+        _: ExecutionContext,
+        context: RouteContext,
+    ): Promise<Response> {
+        try {
+            const agentId = context.pathParams.agentId;
+            if (!agentId) {
+                return CodingAgentController.createErrorResponse('Missing agent ID parameter', 400);
+            }
+            const agentInstance = await getAgentStub(env, agentId);
+            const job = await agentInstance.approveConversionSpec(context.user?.id);
+            return CodingAgentController.createSuccessResponse({ conversionJob: job });
+        } catch (error) {
+            return CodingAgentController.createErrorResponse(
+                error instanceof Error ? error.message : 'Failed to approve conversion specification',
+                400,
+            );
+        }
+    }
+
+    static async verifyConversion(
+        _request: Request,
+        env: Env,
+        _: ExecutionContext,
+        context: RouteContext,
+    ): Promise<Response> {
+        try {
+            const agentId = context.pathParams.agentId;
+            if (!agentId) {
+                return CodingAgentController.createErrorResponse('Missing agent ID parameter', 400);
+            }
+            const agentInstance = await getAgentStub(env, agentId);
+            const evidence = await agentInstance.runConversionVerification();
+            return CodingAgentController.createSuccessResponse({ verification: evidence });
+        } catch (error) {
+            return CodingAgentController.createErrorResponse(
+                error instanceof Error ? error.message : 'Failed to run verification gates',
+                500,
+            );
+        }
+    }
+
+    static async checkUpstreamRepository(
+        request: Request,
+        env: Env,
+        _: ExecutionContext,
+        context: RouteContext,
+    ): Promise<Response> {
+        try {
+            const agentId = context.pathParams.agentId;
+            if (!agentId) {
+                return CodingAgentController.createErrorResponse('Missing agent ID parameter', 400);
+            }
+            const body = (await request.json().catch(() => ({}))) as { githubToken?: string };
+            const agentInstance = await getAgentStub(env, agentId);
+            const status = await agentInstance.checkUpstreamRepository(body.githubToken);
+            return CodingAgentController.createSuccessResponse(status);
+        } catch (error) {
+            return CodingAgentController.createErrorResponse(
+                error instanceof Error ? error.message : 'Failed to check upstream repository',
+                400,
+            );
+        }
+    }
 }

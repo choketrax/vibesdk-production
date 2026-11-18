@@ -1,6 +1,6 @@
 import { Agent, AgentContext, ConnectionContext, getAgentByName } from "agents";
 import { AgentInitArgs, AgentSummary, DeployOptions, DeployResult, ExportOptions, ExportResult, DeploymentTarget, BehaviorType } from "./types";
-import { AgenticState, AgentState, BaseProjectState, CurrentDevState, MAX_PHASES, ThinkState, PhasicState } from "./state";
+import { AgenticState, AgentState, BaseProjectState, ConversionJobState, CurrentDevState, MAX_PHASES, PhasicState, QualificationReport, ThinkState, VerificationGateEvidence } from "./state";
 import { Blueprint } from "../schemas";
 import { BaseCodingBehavior } from "./behaviors/base";
 import { ThinkCodingBehavior } from './behaviors/think';
@@ -430,6 +430,45 @@ export class CodeGeneratorAgent extends Agent<Env, AgentState> implements AgentI
 
     importTemplate(templateName: string): Promise<{ templateName: string; filesImported: number }> {
         return this.behavior.importTemplate(templateName);
+    }
+
+    private requireThinkBehavior(): ThinkCodingBehavior {
+        if (!(this.behavior instanceof ThinkCodingBehavior)) {
+            throw new Error('Conversion pipeline is only supported on Think behavior agents');
+        }
+        return this.behavior;
+    }
+
+    importGitHubRepository(
+        repoUrl: string,
+        ref?: string,
+        githubToken?: string,
+    ): Promise<{ qualification: QualificationReport; conversionJob: ConversionJobState }> {
+        return this.requireThinkBehavior().importGitHubRepository(repoUrl, ref, githubToken);
+    }
+
+    approveConversionSpec(approverId?: string): Promise<ConversionJobState> {
+        return this.requireThinkBehavior().approveConversionSpec(approverId);
+    }
+
+    runConversionVerification(): Promise<VerificationGateEvidence> {
+        return this.requireThinkBehavior().runConversionVerification();
+    }
+
+    checkUpstreamRepository(githubToken?: string): Promise<{
+        sourceRepoUrl: string;
+        branch: string;
+        pinnedCommitSha: string;
+        latestCommitSha: string;
+        behind: boolean;
+    }> {
+        return this.requireThinkBehavior().checkUpstreamRepository(githubToken);
+    }
+
+    deployConversionEnvironment(
+        environment: 'staging' | 'production',
+    ): Promise<{ deploymentUrl?: string; workersUrl?: string } | null> {
+        return this.requireThinkBehavior().deployToCloudflare('user', environment);
     }
     
     protected async saveToDatabase() {

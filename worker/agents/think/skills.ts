@@ -17,6 +17,7 @@ import FRONTEND_DESIGN from './skills/frontend-design/SKILL.md?raw';
 import FRONTEND_DESIGN_LANDING_PAGE from './skills/frontend-design-landing-page/SKILL.md?raw';
 import FRONTEND_DESIGN_SAAS from './skills/frontend-design-saas/SKILL.md?raw';
 import AGENTIC_ENGINEERING from './skills/agentic-engineering/SKILL.md?raw';
+import SAAS_FOUNDATION from './skills/saas-foundation/SKILL.md?raw';
 
 /** Raw `SKILL.md` contents keyed by their source directory name. */
 const RAW_SKILLS: Record<string, string> = {
@@ -26,6 +27,7 @@ const RAW_SKILLS: Record<string, string> = {
 	'frontend-design-landing-page': FRONTEND_DESIGN_LANDING_PAGE,
 	'frontend-design-saas': FRONTEND_DESIGN_SAAS,
 	'agentic-engineering': AGENTIC_ENGINEERING,
+	'saas-foundation': SAAS_FOUNDATION,
 };
 
 function buildEntries(): SkillManifestEntry[] {

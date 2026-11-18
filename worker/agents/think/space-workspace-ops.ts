@@ -94,7 +94,19 @@ function compareByPath(a: FileInfo, b: FileInfo): number {
 	return a.path.localeCompare(b.path);
 }
 
-export function createSpaceWorkspaceOps(getStub: () => SpaceWorkspaceStub): SpaceWorkspaceOps {
+const READ_ONLY_ERROR =
+	'Workspace is read-only until the Conversion Specification is approved. Inspect files with read/list/find/grep and call submit_conversion_spec first.';
+
+export function createSpaceWorkspaceOps(
+	getStub: () => SpaceWorkspaceStub,
+	options?: { readOnly?: () => boolean },
+): SpaceWorkspaceOps {
+	const assertWritable = () => {
+		if (options?.readOnly?.()) {
+			throw new Error(READ_ONLY_ERROR);
+		}
+	};
+
 	const ops: SpaceWorkspaceOps = {
 		async readFile(path: string): Promise<string | null> {
 			try {
@@ -123,12 +135,14 @@ export function createSpaceWorkspaceOps(getStub: () => SpaceWorkspaceStub): Spac
 		},
 
 		async writeFile(path: string, content: string): Promise<void> {
+			assertWritable();
 			// TEMP: flag double-escaped content arriving at the write boundary.
 			logSuspiciousEscaping(path, content);
 			await withDurableObjectResetRetry(getStub, (stub) => stub.writeFile(path, content));
 		},
 
 		async mkdir(path: string, opts?: { recursive?: boolean }): Promise<void> {
+			assertWritable();
 			await withDurableObjectResetRetry(getStub, (stub) => stub.mkdir(path, opts));
 		},
 
@@ -157,6 +171,7 @@ export function createSpaceWorkspaceOps(getStub: () => SpaceWorkspaceStub): Spac
 			path: string,
 			opts?: { recursive?: boolean; force?: boolean },
 		): Promise<void> {
+			assertWritable();
 			await withDurableObjectResetRetry(getStub, (stub) => stub.rm(path, opts));
 		},
 	};

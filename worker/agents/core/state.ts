@@ -126,6 +126,119 @@ export interface AgenticState extends BaseProjectState {
  * companion `SpaceDO` workspace and are read on demand via RPC. The map is
  * kept for shape compatibility and used as a small in-memory cache.
  */
+export type QualificationOutcome = 'Accept' | 'Conditional' | 'Manual Review' | 'Reject';
+export type RuntimeTarget = 'Native Cloudflare' | 'Hybrid Cloudflare' | 'Unsupported';
+
+export interface QualificationReport {
+    repoUrl: string;
+    owner: string;
+    repo: string;
+    pinnedCommitSha: string;
+    license: {
+        spdxId: string | null;
+        commercialCompatible: boolean;
+        obligations: string[];
+    };
+    architecture: {
+        language: string;
+        frameworks: string[];
+        hasWranglerConfig: boolean;
+        entryCandidates: string[];
+        databaseDrivers: string[];
+        authPatterns: string[];
+        hasTenantSeparation: boolean;
+    };
+    cloudflareCompatibility: {
+        runtimeTarget: RuntimeTarget;
+        incompatiblePackages: string[];
+        neutralizedScripts: string[];
+        notes: string[];
+    };
+    risks: Array<{
+        severity: 'low' | 'medium' | 'high' | 'critical';
+        category: string;
+        message: string;
+        file?: string;
+    }>;
+    estimatedComplexity: 'low' | 'medium' | 'high';
+    outcome: QualificationOutcome;
+    evaluatedAt: number;
+}
+
+export interface ConversionSpecTask {
+    id: string;
+    title: string;
+    files: string[];
+    completed?: boolean;
+    commitSha?: string;
+}
+
+export interface ConversionSpec {
+    preserve: string[];
+    refactor: string[];
+    replace: string[];
+    add: string[];
+    runtimeTarget: RuntimeTarget;
+    tasks: ConversionSpecTask[];
+    status: 'pending_approval' | 'approved' | 'revision_required';
+    submittedAt: number;
+    approvedAt?: number;
+    approvedBy?: string;
+}
+
+export interface VerificationGateEvidence {
+    commitSha: string;
+    evaluatedAt: number;
+    buildGate: { passed: boolean; details: string };
+    safetyAndSecretGate: {
+        passed: boolean;
+        findingsCount: number;
+        secretLeaksCount: number;
+        details: string[];
+    };
+    functionalSmokeGate: {
+        passed: boolean;
+        statusCode?: number;
+        consoleErrors: string[];
+    };
+    tenantIsolationGate: { passed: boolean; details: string };
+    allPassed: boolean;
+}
+
+export type ConversionJobStage =
+    | 'imported'
+    | 'qualified'
+    | 'spec_pending'
+    | 'approved'
+    | 'refactoring'
+    | 'verified'
+    | 'staging_deployed'
+    | 'production_deployed'
+    | 'rejected';
+
+export interface ConversionJobState {
+    jobId: string;
+    sourceRepoUrl: string;
+    owner: string;
+    repo: string;
+    branch: string;
+    pinnedCommitSha: string;
+    baselineSpaceCommitSha?: string;
+    stage: ConversionJobStage;
+    qualification?: QualificationReport;
+    spec?: ConversionSpec;
+    budget: {
+        maxStepsPerJob: number;
+        usedSteps: number;
+        maxRepairCycles: number;
+        usedRepairCycles: number;
+    };
+    verification?: VerificationGateEvidence;
+    stagingDeploymentUrl?: string;
+    productionDeploymentUrl?: string;
+    lastKnownGoodCommitSha?: string;
+}
+
 export interface ThinkState extends BaseProjectState {
     behaviorType: 'think';
     blueprint: AgenticBlueprint;
@@ -136,6 +249,7 @@ export interface ThinkState extends BaseProjectState {
     /** Last commit SHA we successfully deployed. */
     lastDeployedCommit?: string;
     cloudflareDeploymentUrl?: string;
+    conversionJob?: ConversionJobState;
 }
 
 export type AgentState = PhasicState | AgenticState | ThinkState;

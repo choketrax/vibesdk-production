@@ -573,4 +573,91 @@ export class GitHubService {
         }
     }
 
+    /**
+     * Resolve a repository's pinned commit SHA, default branch, and SPDX license ID.
+     * Supports public repositories without a token or private repositories with a token.
+     */
+    static async resolveCommitSha(
+        owner: string,
+        repo: string,
+        ref?: string,
+        token?: string,
+    ): Promise<{ sha: string; defaultBranch: string; licenseSpdx: string | null }> {
+        const headers: Record<string, string> = {
+            Accept: 'application/vnd.github+json',
+            'User-Agent': 'VibeSDK-SaaS-Engine',
+        };
+        if (token?.trim()) {
+            headers.Authorization = `Bearer ${token.trim()}`;
+        }
+
+        const repoRes = await fetch(
+            `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`,
+            { headers },
+        );
+        if (!repoRes.ok) {
+            throw new GitHubServiceError(
+                `Failed to inspect GitHub repository ${owner}/${repo} (${repoRes.status})`,
+                'REPO_FETCH_FAILED',
+            );
+        }
+        const repoData = (await repoRes.json()) as {
+            default_branch?: string;
+            license?: { spdx_id?: string | null } | null;
+        };
+        const defaultBranch = repoData.default_branch || 'main';
+        const branchOrRef = ref?.trim() || defaultBranch;
+
+        const commitRes = await fetch(
+            `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/commits/${encodeURIComponent(branchOrRef)}`,
+            { headers },
+        );
+        if (!commitRes.ok) {
+            throw new GitHubServiceError(
+                `Failed to resolve commit SHA for ${owner}/${repo}@${branchOrRef} (${commitRes.status})`,
+                'COMMIT_RESOLVE_FAILED',
+            );
+        }
+        const commitData = (await commitRes.json()) as { sha?: string };
+        if (!commitData.sha) {
+            throw new GitHubServiceError('GitHub commit response missing sha', 'COMMIT_RESOLVE_FAILED');
+        }
+
+        return {
+            sha: commitData.sha,
+            defaultBranch,
+            licenseSpdx: repoData.license?.spdx_id ?? null,
+        };
+    }
+
+    /**
+     * Download a GitHub repository zipball archive at an exact pinned commit SHA.
+     */
+    static async downloadRepoZipArchive(
+        owner: string,
+        repo: string,
+        commitSha: string,
+        token?: string,
+    ): Promise<ArrayBuffer> {
+        const headers: Record<string, string> = {
+            Accept: 'application/vnd.github+json',
+            'User-Agent': 'VibeSDK-SaaS-Engine',
+        };
+        if (token?.trim()) {
+            headers.Authorization = `Bearer ${token.trim()}`;
+        }
+
+        const res = await fetch(
+            `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/zipball/${encodeURIComponent(commitSha)}`,
+            { headers, redirect: 'follow' },
+        );
+        if (!res.ok) {
+            throw new GitHubServiceError(
+                `Failed to download zip archive for ${owner}/${repo}@${commitSha} (${res.status})`,
+                'ARCHIVE_DOWNLOAD_FAILED',
+            );
+        }
+        return await res.arrayBuffer();
+    }
+
 }

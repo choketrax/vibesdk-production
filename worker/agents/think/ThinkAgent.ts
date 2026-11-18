@@ -20,6 +20,7 @@ import { createBrowserConsoleLogsTool } from './browser-logs-tool';
 import { createDeploySpaceTool } from './deploy-tool';
 import { createCommitTool } from './commit-tool';
 import { createSetTitleTool } from './set-title-tool';
+import { createSubmitConversionSpecTool } from './conversion-spec-tool';
 import { selectThinkContextMessages } from './context-selector';
 import { getUserConfigurableSettings } from '../../config';
 import { RateLimitService } from '../../services/rate-limit/rateLimits';
@@ -64,6 +65,10 @@ export interface ThinkAgentConfig {
 	 * as the default target for the `get_browser_console_logs` tool.
 	 */
 	previewUrl?: string;
+	/** Locks write/mkdir/rm tools while a conversion spec awaits approval. */
+	readOnlyWorkspace?: boolean;
+	/** Optional conversion-job summary injected into system prompt context. */
+	conversionContextSummary?: string;
 }
 
 const DEFAULT_SYSTEM_PROMPT =
@@ -286,7 +291,10 @@ export class ThinkAgent extends Think<Env> {
 		// appended. Think additionally injects the skill catalog (see getSkills).
 		const base = selectSystemPrompt(cfg?.model.modelName ?? '');
 		const projectContext = cfg?.systemPrompt ?? DEFAULT_SYSTEM_PROMPT;
-		return `${base}\n\n${projectContext}`;
+		const conversionBlock = cfg?.conversionContextSummary
+			? `\n\n${cfg.conversionContextSummary}`
+			: '';
+		return `${base}\n\n${projectContext}${conversionBlock}`;
 	}
 
 	override async beforeTurn(ctx: TurnContext): Promise<TurnConfig> {
@@ -320,7 +328,9 @@ export class ThinkAgent extends Think<Env> {
 	}
 
 	override getTools(): ToolSet {
-		const ops = createSpaceWorkspaceOps(() => this.getSpaceStub());
+		const ops = createSpaceWorkspaceOps(() => this.getSpaceStub(), {
+			readOnly: () => Boolean(this.getConfig<ThinkAgentConfig>()?.readOnlyWorkspace),
+		});
 		const previewUrl = this.getConfig<ThinkAgentConfig>()?.previewUrl;
 		// Same names as Think's built-in workspace tools, so these SpaceDO-backed
 		// versions win the tool-merge. Bash is disabled via `workspaceBash`.
@@ -336,6 +346,8 @@ export class ThinkAgent extends Think<Env> {
 			commit: createCommitTool({ getStub: () => this.getSpaceStub() }),
 			// Commit + deploy the SpaceDO branch so the preview rebuilds.
 			deploy_space: createDeploySpaceTool({ getStub: () => this.getSpaceStub() }),
+			// Submit a Phase 2 conversion specification before editing imported code.
+			submit_conversion_spec: createSubmitConversionSpecTool(),
 			// Set the project's short display title (host observes the output).
 			set_title: createSetTitleTool(),
 			// Ask the user clarifying questions via a frontend popup.

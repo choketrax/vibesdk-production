@@ -81,4 +81,28 @@ export function setupCodegenRoutes(app: Hono<AppEnv>): void {
         setAuthLevel(AuthConfig.ownerOnly),
         adaptController(ArtifactsController, ArtifactsController.listBranches),
     );
+
+    // ========================================
+    // GITHUB-TO-SAAS CONVERSION PIPELINE ROUTES
+    // ========================================
+    app.post(
+        '/api/agent/:agentId/conversion/import',
+        setAuthLevel(AuthConfig.ownerOnly),
+        adaptController(CodingAgentController, CodingAgentController.importGitHubRepository),
+    );
+    app.post(
+        '/api/agent/:agentId/conversion/approve-spec',
+        setAuthLevel(AuthConfig.ownerOnly),
+        adaptController(CodingAgentController, CodingAgentController.approveConversionSpec),
+    );
+    app.post(
+        '/api/agent/:agentId/conversion/verify',
+        setAuthLevel(AuthConfig.ownerOnly),
+        adaptController(CodingAgentController, CodingAgentController.verifyConversion),
+    );
+    app.post(
+        '/api/agent/:agentId/conversion/check-upstream',
+        setAuthLevel(AuthConfig.ownerOnly),
+        adaptController(CodingAgentController, CodingAgentController.checkUpstreamRepository),
+    );
 }
