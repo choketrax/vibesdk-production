@@ -87,3 +87,11 @@ export function recordAuditEvent(
 - Keep existing domain features listed under `Preserve` intact; adapt data access through a thin tenant-scoped repository helper rather than rewriting working UI logic unless specified.
 - Never hardcode Stripe keys, JWT secrets, or SMTP passwords—read them from `env` bindings and document required secrets in the final deployment checklist.
 - After implementing each spec task, run `commit` to save an incremental restore point.
+
+## Agent Execution & Precision Heuristics (OpenCode Pattern)
+1. **Targeted Diffs Over Full Rewrites:** Prefer `edit` with exact context lines over `write` wholesale replacements. Rewriting large files wastes token budget and risks dropping working functionality or introducing isolate timeouts.
+2. **Evidence Before Synthesis:** Never assume an exported function, type, or database column exists simply because it was planned. Inspect the source file (`read` / `find` / `grep`) to verify the exact identifier, signature, and export before calling it.
+3. **No Hallucinated Placeholders:** Never emit placeholder syntax (e.g. `<owner>/<repo>`, `YOUR_KEY_HERE`, or mock stubs) in production code paths. If a parameter or secret is required, derive it from environment bindings or raise an explicit error.
+4. **Boundary Verification:** After calling `edit`, inspect the edited region to ensure surrounding syntax, imports, and closing braces remain intact.
+5. **Clean Comment Density:** Match the surrounding codebase's comment density. Write self-documenting TypeScript; do not use code comments for agent chain-of-thought or conversational commentary.
+
